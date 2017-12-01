@@ -145,9 +145,17 @@ class TetrisPane extends JPanel {
 //                        System.out.println(++y);
                     }
                 }else{
+
                 }
+
+
             }
         }
+        /*  測試是否能正常顯示掉落方塊*/
+        g.drawImage(color[0],(0%4+x)*33+3+175,(0/4+y)*33+3,null);
+        g.drawImage(color[0],(1%4+x)*33+3+175,(1/4+y)*33+3,null);
+        g.drawImage(color[0],(2%4+x)*33+3+175,(2/4+y)*33+3,null);
+        g.drawImage(color[0],(3%4+x)*33+3+175,(3/4+y)*33+3,null);
     }
     class TimerListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {

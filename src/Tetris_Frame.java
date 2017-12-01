@@ -21,9 +21,11 @@ public class Tetris_Frame extends JFrame {
 //        this.setBounds(dim.width/2-FrameW/2,dim.height/2-FrameH/2,FrameW,FrameH);
         this.setBounds(0,0,FrameW,FrameH);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
 //        this.setResizable(false);
         cp=this.getContentPane();
         cp.setLayout(null);
+        cp.setBackground(new Color(25, 85, 15));
         /*
             TetrisPane是用來畫遊戲畫面的,包括方塊and動作
          */
@@ -45,10 +47,17 @@ class TetrisPane extends JPanel {
     public TetrisPane() {
         this.setLayout(null);
 //        this.setBackground(Color.BLACK);
-        this.setBackground(new Color(81, 137,255));
+        this.setBackground(new Color(63, 61, 64));
         /*   指定圖片檔位置   */
-        backimage1=Toolkit.getDefaultToolkit().getImage("Tetris_image/bg1.png");
-        backimage2=Toolkit.getDefaultToolkit().getImage("Tetris_image/bg2.png");
+        try{
+            backimage1 = ImageIO.read(getClass().getResource("Tetris_image/bg1.png"));
+            backimage2 = ImageIO.read(getClass().getResource("Tetris_image/bg2.png"));
+        }catch (IOException io){
+            io.printStackTrace();
+        }
+        /*  不明原因,toolkit的圖片讀取方式不能用*/
+//        backimage1=Toolkit.getDefaultToolkit().getImage("Tetris_image/bg1.png");
+//        backimage2=Toolkit.getDefaultToolkit().getImage("Tetris_image/bg2.png");
         /*  初始化背景陣列  */
         initmap();
         /*  宣告Timer  */
@@ -78,12 +87,17 @@ class TetrisPane extends JPanel {
                 if (map[i][j] == 0) {
                     if ((i + j) % 2 == 0) {
                         /*  背景圖1,位置x:,位置y:*/
-                        g.drawImage(backimage1, i * 32 + 190, j * 32, null);
+                        g.drawImage(backimage1, i*30+3*(i+1)+175, j*30+3*(j+1), null);
+//                        g.drawImage(backimage1,  j*32+190, i*32, null);
 //                        System.out.println(++x);
+//                        System.out.println(i*30+3*(i+1)+150);
+//                        System.out.println(j*30+3*(j+1));
                     } else {
-                        g.drawImage(backimage2, i * 32 + 290, j * 32, null);
+                        g.drawImage(backimage2, i*30+3*(i+1)+175, j*30+3*(j+1), null);
+//                        g.drawImage(backimage2,  j*32+190, i*32, null);
 //                        System.out.println(++y);
                     }
+                }else{
                 }
             }
         }

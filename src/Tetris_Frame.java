@@ -43,6 +43,50 @@ class TetrisPane extends JPanel {
     /*  宣告方塊圖片  */
     private Image backimage1;
     private Image backimage2;
+    /*  */
+    private int blockType;
+    private int turnState;
+    private int x,y;
+    private int holdBox,nextBox,changedBox;
+    private boolean flag = false;
+    private Image [] color = new Image[8];
+    private final int shapes[][][]=new int[][][]{
+            // I
+            { { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0 },
+                    { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0 } },
+            // s
+            { { 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+                    { 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 } },
+            // z
+            { { 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 } },
+            // j
+            { { 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+                    { 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+            // o
+            { { 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+            // l
+            { { 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+                    { 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
+            // t
+            { { 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+                    { 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                    { 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 } }
+    };
 
     public TetrisPane() {
         this.setLayout(null);
@@ -52,6 +96,14 @@ class TetrisPane extends JPanel {
         try{
             backimage1 = ImageIO.read(getClass().getResource("Tetris_image/bg1.png"));
             backimage2 = ImageIO.read(getClass().getResource("Tetris_image/bg2.png"));
+            color[0]=ImageIO.read(getClass().getResource("Tetris_image/lightBlue.png"));
+            color[1]=ImageIO.read(getClass().getResource("Tetris_image/red.png"));
+            color[2]=ImageIO.read(getClass().getResource("Tetris_image/green.png"));
+            color[3]=ImageIO.read(getClass().getResource("Tetris_image/blue.png"));
+            color[4]=ImageIO.read(getClass().getResource("Tetris_image/yellow.png"));
+            color[5]=ImageIO.read(getClass().getResource("Tetris_image/orange.png"));
+            color[6]=ImageIO.read(getClass().getResource("Tetris_image/purple.png"));
+            color[7]=ImageIO.read(getClass().getResource("Tetris_image/gray.png"));
         }catch (IOException io){
             io.printStackTrace();
         }
@@ -76,11 +128,6 @@ class TetrisPane extends JPanel {
     /*  swing用來畫圖的方法,awt中不用重寫方法,但是swing需要重寫*/
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-//        g.drawImage(backimage1,500,500,null);
-//        g.drawImage(backimage1,132,132,null);
-//        g.drawImage(backimage2,132,164,null);
-//        g.drawImage(backimage2,800,500,null);
-//        int x = 0, y = 0;
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 20; j++) {
                 /*  奇數就用背景圖2,偶數就用背景圖1*/

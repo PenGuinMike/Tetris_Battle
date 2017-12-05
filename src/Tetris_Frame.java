@@ -102,7 +102,8 @@ class TetrisPane extends JPanel implements KeyListener{
         try{
             backimage1 = ImageIO.read(getClass().getResource("Tetris_image/bg1.png"));
             backimage2 = ImageIO.read(getClass().getResource("Tetris_image/bg2.png"));
-            color[0]=ImageIO.read(getClass().getResource("Tetris_image/lightBlue3.png"));
+            color[0]=ImageIO.read(getClass().getResource("Tetris_image/shadow.png"));
+//            color[0]=ImageIO.read(getClass().getResource("Tetris_image/lightBlue3.png"));
             color[1]=ImageIO.read(getClass().getResource("Tetris_image/red.png"));
             color[2]=ImageIO.read(getClass().getResource("Tetris_image/green1.png"));
             color[3]=ImageIO.read(getClass().getResource("Tetris_image/blue1.png"));
@@ -169,7 +170,6 @@ class TetrisPane extends JPanel implements KeyListener{
                 }
             }
         }
-
         if(holdblock>=0){
             for(int i=0;i<16;i++){
                 if(shapes[holdblock][0][i]==1){
@@ -242,6 +242,17 @@ class TetrisPane extends JPanel implements KeyListener{
         }
 
         return down;
+    }
+
+    public void fall_down(){
+        while (blow(x,y+1,blockType,turnState)==1){
+            y++;
+        }repaint();
+        if (blow(x,y+1,blockType,turnState)==0){
+            setBlock(x,y,blockType,turnState);
+            newBlock();
+            deLine();
+        }
     }
 
     public int r_Shift(){
@@ -343,11 +354,27 @@ class TetrisPane extends JPanel implements KeyListener{
             case KeyEvent.VK_UP:
                 roTate();
                 break;
+//            case KeyEvent.VK_SHIFT:
+//                if(hold >= 0 && change == 1) {
+//                    int tmp;
+//                    tmp = hold;
+//                    hold = blockType;
+//                    blockType = tmp;
+//                    x = 4;
+//                    y = 0;
+//                    change = 0;
+//                } else if(change == 1) {
+//                    hold = blockType;
+//                    newBlock();
+//
+//                }
+//                break;
             case KeyEvent.VK_SHIFT:
                 if(holdblock>=0&&changedblock==1){
                     int temp;
                     temp=holdblock;
-                    holdblock=temp;
+                    holdblock=blockType;
+                    blockType=temp;
                     x=4;y=0;
                     changedblock=0;
                 }else if(changedblock==1){
@@ -355,12 +382,17 @@ class TetrisPane extends JPanel implements KeyListener{
                     newBlock();
                 }
                 break;
+
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-
+        switch (e.getKeyCode()){
+            case KeyEvent.VK_SPACE:
+                fall_down();
+                break;
+        }
     }
 
     class TimerListener implements ActionListener {
@@ -368,6 +400,14 @@ class TetrisPane extends JPanel implements KeyListener{
             down_Shift();
             repaint();
 
+        }
+    }
+    void Sleep(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            System.out.println("Unexcepted interrupt");
+            System.exit(0);
         }
     }
 }

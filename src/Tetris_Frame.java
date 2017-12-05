@@ -3,6 +3,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -31,24 +33,27 @@ public class Tetris_Frame extends JFrame {
          */
         TetrisPane tp = new TetrisPane();
         tp.setBounds(100,80,700,700);
-        cp.add(tp);
         tp.setPreferredSize(new Dimension(700,700));
+        cp.add(tp);addKeyListener(tp);
+
     }
 }
 
 
-class TetrisPane extends JPanel {
+class TetrisPane extends JPanel implements KeyListener{
     /*  宣告背景陣列  */
     public int map[][] = new int[10][20];
     /*  宣告方塊圖片  */
     private Image backimage1;
     private Image backimage2;
-    /*  */
+    /*  宣告方塊數據*/
     private int blockType;
     private int turnState;
     private int x,y;
-    private int holdBox,nextBox,changedBox;
+    private int holdblock,nextblock,changedblock;
+    /*  flag判斷方塊是否已放置*/
     private boolean flag = false;
+    /*  新增方塊圖片檔*/
     private Image [] color = new Image[8];
     private final int shapes[][][]=new int[][][]{
             // I
@@ -83,9 +88,10 @@ class TetrisPane extends JPanel {
                     { 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
             // t
             { { 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                    { 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+                    { 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
                     { 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                    { 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 } }
+                    { 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 }
+                     }
     };
 
     public TetrisPane() {
@@ -96,12 +102,12 @@ class TetrisPane extends JPanel {
         try{
             backimage1 = ImageIO.read(getClass().getResource("Tetris_image/bg1.png"));
             backimage2 = ImageIO.read(getClass().getResource("Tetris_image/bg2.png"));
-            color[0]=ImageIO.read(getClass().getResource("Tetris_image/lightBlue.png"));
+            color[0]=ImageIO.read(getClass().getResource("Tetris_image/lightBlue3.png"));
             color[1]=ImageIO.read(getClass().getResource("Tetris_image/red.png"));
-            color[2]=ImageIO.read(getClass().getResource("Tetris_image/green.png"));
-            color[3]=ImageIO.read(getClass().getResource("Tetris_image/blue.png"));
+            color[2]=ImageIO.read(getClass().getResource("Tetris_image/green1.png"));
+            color[3]=ImageIO.read(getClass().getResource("Tetris_image/blue1.png"));
             color[4]=ImageIO.read(getClass().getResource("Tetris_image/yellow.png"));
-            color[5]=ImageIO.read(getClass().getResource("Tetris_image/orange.png"));
+            color[5]=ImageIO.read(getClass().getResource("Tetris_image/orange1.png"));
             color[6]=ImageIO.read(getClass().getResource("Tetris_image/purple.png"));
             color[7]=ImageIO.read(getClass().getResource("Tetris_image/gray.png"));
         }catch (IOException io){
@@ -110,10 +116,15 @@ class TetrisPane extends JPanel {
         /*  不明原因,toolkit的圖片讀取方式不能用*/
 //        backimage1=Toolkit.getDefaultToolkit().getImage("Tetris_image/bg1.png");
 //        backimage2=Toolkit.getDefaultToolkit().getImage("Tetris_image/bg2.png");
+
+
         /*  初始化背景陣列  */
         initmap();
+        newBlock();
+        holdblock=-1;
+        nextblock=(int)(Math.random()*7);
         /*  宣告Timer  */
-        Timer t1 = new Timer(2000, new TimerListener());
+        Timer t1 = new Timer(800, new TimerListener());
         t1.start();
     }
     /*  背景陣列全部設成0*/
@@ -145,21 +156,218 @@ class TetrisPane extends JPanel {
 //                        System.out.println(++y);
                     }
                 }else{
-
+                    g.drawImage(color[map[i][j]-1],i*30+3*(i+1)+175,j*30+3*(j+1),null);
                 }
 
+            }
+        }//for loop end
 
+        if(!flag){
+            for (int i=0;i<16;i++){
+                if(shapes[blockType][turnState][i]==1){
+                    g.drawImage(color[blockType], (i%4+x)*33+3+175, (i/4+y)*33+3, null);
+                }
             }
         }
-        /*  測試是否能正常顯示掉落方塊*/
-        g.drawImage(color[0],(0%4+x)*33+3+175,(0/4+y)*33+3,null);
-        g.drawImage(color[0],(1%4+x)*33+3+175,(1/4+y)*33+3,null);
-        g.drawImage(color[0],(2%4+x)*33+3+175,(2/4+y)*33+3,null);
-        g.drawImage(color[0],(3%4+x)*33+3+175,(3/4+y)*33+3,null);
+
+        if(holdblock>=0){
+            for(int i=0;i<16;i++){
+                if(shapes[holdblock][0][i]==1){
+                    g.drawImage(color[holdblock],(i%4)*33+3+20, (i/4)*33+3+80, null);
+                }
+            }
+        }
+
+        for(int i=0;i<16;i++){
+            if(shapes[nextblock][0][i]==1){
+                g.drawImage(color[nextblock],(i%4)*33+3+550, (i/4)*33+80, null);
+            }
+        }
+
+//        /*  測試是否能正常顯示掉落方塊*/
+//        g.drawImage(color[0],(0%4+x)*33+3+175,(0/4+y)*33+3,null);
+//        g.drawImage(color[0],(1%4+x)*33+3+175,(1/4+y)*33+3,null);
+//        g.drawImage(color[0],(2%4+x)*33+3+175,(2/4+y)*33+3,null);
+//        g.drawImage(color[0],(3%4+x)*33+3+175,(3/4+y)*33+3,null);
     }
+
+    public int blow(int x ,int y, int blockType,int turnState){
+        for(int i=0;i<16;i++){
+            if(shapes[blockType][turnState][i]==1){
+                if (x+i%4>=10||y+i/4>=20||x+i%4<0||y+i<0){
+                    return 0;
+                }
+                if (map[x+i%4][y+i/4]!=0){
+                    return 0;
+                }
+            }
+        }
+        return 1;
+    }
+
+    public void setBlock(int x,int y,int blockType,int turnState){
+        flag=true;
+        for (int i=0;i<16;i++){
+            if(shapes[blockType][turnState][i]==1){
+                map[x+i%4][y+i/4]=blockType+1;
+            }
+        }
+    }
+
+    public void newBlock(){
+        flag=false;
+        blockType = nextblock;
+        changedblock = 1;
+        nextblock = (int)(Math.random()*7);
+        turnState=0;
+        x=4;y=0;
+        if(gameOver(x,y)==1){
+            initmap();
+        }
+        repaint();
+    }
+
+
+    public int down_Shift(){
+        int down=0;
+        if(blow(x,y+1,blockType,turnState)==1){
+            y++;
+            down=1;
+        }repaint();
+        if (blow(x,y+1,blockType,turnState)==0){
+            setBlock(x,y,blockType,turnState);
+            newBlock();
+            deLine();
+            down=0;
+        }
+
+        return down;
+    }
+
+    public int r_Shift(){
+        int right=0;
+        if (blow(x+1,y,blockType,turnState)==1){
+            x++;
+            System.out.println(x);
+            right=1;
+        }repaint();
+        return right;
+
+
+    }
+
+    public void l_Shift(){
+        if (blow(x-1,y,blockType,turnState)==1){
+//            System.out.println(x);
+            x--;
+            System.out.println(x);
+        }repaint();
+    }
+
+
+
+    public int gameOver(int x,int y){
+        if(blow(x,y,blockType,turnState)==0){
+            return 1;
+        }return 0;
+    }
+    public void roTate(){
+        int tmpState = turnState;
+        tmpState = (turnState+1)%4;
+        if(blow(x,y,blockType,tmpState)==1){
+            turnState=tmpState;
+        }else{
+            if(x==8&&blockType==0){
+                x--;
+                x--;
+                turnState=tmpState;
+            }else if(x>5){
+                --x;
+                turnState=tmpState;
+            } else if(x<3){
+                x++;
+                turnState=tmpState;
+            }else if(x>6){
+                x-=2;
+                turnState=tmpState;
+            }
+
+        }
+        repaint();
+    }
+
+
+    void deLine(){
+        int row=19,access1=0;
+        for(int i=19;i>=0;i--){
+            int count=0;
+            for(int j=0;j<10;j++){
+                if(map[j][i]!=0){
+                    count++;
+                }
+            }
+
+            if(count==10){
+                access1=1;
+                for(int j=0;j<10;j++){
+                    map[j][i]=0;
+                }
+            }
+            else{
+                for(int j = 0;j<10;j++){
+                    map[j][row]=map[j][i];
+                }
+                row--;
+            }
+        }
+
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        switch (e.getKeyCode()){
+            case KeyEvent.VK_DOWN:
+                down_Shift();
+                break;
+            case KeyEvent.VK_LEFT:
+                l_Shift();
+                break;
+            case KeyEvent.VK_RIGHT:
+                r_Shift();
+                break;
+            case KeyEvent.VK_UP:
+                roTate();
+                break;
+            case KeyEvent.VK_SHIFT:
+                if(holdblock>=0&&changedblock==1){
+                    int temp;
+                    temp=holdblock;
+                    holdblock=temp;
+                    x=4;y=0;
+                    changedblock=0;
+                }else if(changedblock==1){
+                    holdblock=blockType;
+                    newBlock();
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
+    }
+
     class TimerListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
+            down_Shift();
             repaint();
+
         }
     }
 }

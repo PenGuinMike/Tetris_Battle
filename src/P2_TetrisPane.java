@@ -5,39 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
-public class Tetris_Frame extends JFrame {
-    Container cp;
-    int FrameW=1800,FrameH=900;
-    private Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-    public Tetris_Frame (){
-        init();
-    }
-    private void init (){
-        this.setTitle("Tetris Battle_v0.001");
-//        this.setBounds(dim.width/2-FrameW/2,dim.height/2-FrameH/2,FrameW,FrameH);
-        this.setBounds(0,0,FrameW,FrameH);
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.setResizable(false);
-        cp=this.getContentPane();
-        cp.setLayout(null);
-        cp.setBackground(new Color(25, 85, 15));
-        /* TetrisPane是用來畫遊戲畫面的,包括方塊and動作   */
-        TetrisPane tp = new TetrisPane();
-        P2_TetrisPane tp2 = new P2_TetrisPane();
-//        TetrisPane tp2 = new TetrisPane();
-        tp.setBounds(100,80,700,700);
-        tp2.setBounds(1000,80,700,700);
-        tp.setPreferredSize(new Dimension(700,700));
-//        tp2.setPreferredSize(new Dimension(700,700));
-        cp.add(tp);addKeyListener(tp);
-        cp.add(tp2);
-    }
-}
-class TetrisPane extends JPanel implements KeyListener{
+    public class P2_TetrisPane extends JPanel {
     /*  宣告背景陣列  */
     public int map[][] = new int[10][20];
     /*  宣告方塊圖片  */
@@ -90,15 +60,15 @@ class TetrisPane extends JPanel implements KeyListener{
                     { 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
                     { 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
                     { 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 }
-                     }
+            }
     };
-    public TetrisPane() {
+    public P2_TetrisPane() {
         this.setLayout(null);
 //        this.setBackground(Color.BLACK);
         this.setBackground(new Color(63, 61, 64));
         /*   指定圖片檔位置   */
         try{
-            shadowBk =ImageIO.read(getClass().getResource("Tetris_image/shadow.png"));
+            shadowBk = ImageIO.read(getClass().getResource("Tetris_image/shadow.png"));
             backimage1 = ImageIO.read(getClass().getResource("Tetris_image/bg1.png"));
             backimage2 = ImageIO.read(getClass().getResource("Tetris_image/bg2.png"));
 //            color[0]=ImageIO.read(getClass().getResource("Tetris_image/shadow.png"));
@@ -315,50 +285,6 @@ class TetrisPane extends JPanel implements KeyListener{
             }
         }
     }
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-    @Override
-    public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()){
-            case KeyEvent.VK_DOWN:
-                down_Shift();
-                break;
-            case KeyEvent.VK_LEFT:
-                l_Shift();
-                break;
-            case KeyEvent.VK_RIGHT:
-                r_Shift();
-                break;
-            case KeyEvent.VK_UP:
-                roTate();
-                break;
-            case KeyEvent.VK_SHIFT:
-                if(holdblock>=0&&changedblock==1){
-                    int temp;
-                    temp=holdblock;
-                    holdblock=blockType;
-                    blockType=temp;
-                    x=4;y=0;
-                    changedblock=0;
-                }else if(changedblock==1){
-                    holdblock=blockType;
-                    newBlock();
-                }
-                break;
-
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        switch (e.getKeyCode()){
-            case KeyEvent.VK_SPACE:
-                fall_down();
-                break;
-        }
-    }
-
     class TimerListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             down_Shift();

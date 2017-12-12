@@ -13,46 +13,45 @@ public class Tetris_Frame extends JFrame {
     Container cp;
     int FrameW=1800,FrameH=900;
     private Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-
     public Tetris_Frame (){
         init();
     }
-
     private void init (){
         this.setTitle("Tetris Battle_v0.001");
 //        this.setBounds(dim.width/2-FrameW/2,dim.height/2-FrameH/2,FrameW,FrameH);
         this.setBounds(0,0,FrameW,FrameH);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-//        this.setResizable(false);
+        this.setResizable(false);
         cp=this.getContentPane();
         cp.setLayout(null);
         cp.setBackground(new Color(25, 85, 15));
-        /*
-            TetrisPane是用來畫遊戲畫面的,包括方塊and動作
-         */
+        /* TetrisPane是用來畫遊戲畫面的,包括方塊and動作   */
         TetrisPane tp = new TetrisPane();
+        TetrisPane tp2 = new TetrisPane();
+//        TetrisPane2 tp2=new TetrisPane2();
         tp.setBounds(100,80,700,700);
+        tp2.setBounds(1000,80,700,700);
         tp.setPreferredSize(new Dimension(700,700));
+//        tp2.setPreferredSize(new Dimension(700,700));
         cp.add(tp);addKeyListener(tp);
-
+        cp.add(tp2);
     }
 }
-
-
 class TetrisPane extends JPanel implements KeyListener{
     /*  宣告背景陣列  */
     public int map[][] = new int[10][20];
     /*  宣告方塊圖片  */
     private Image backimage1;
     private Image backimage2;
+    private Image shadowBk;
     /*  宣告方塊數據*/
     private int blockType;
     private int turnState;
-    private int x,y;
+    private int x,y,z;
     private int holdblock,nextblock,changedblock;
     /*  flag判斷方塊是否已放置*/
     private boolean flag = false;
+    private int currentblock;
     /*  新增方塊圖片檔*/
     private Image [] color = new Image[8];
     private final int shapes[][][]=new int[][][]{
@@ -93,17 +92,17 @@ class TetrisPane extends JPanel implements KeyListener{
                     { 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 }
                      }
     };
-
     public TetrisPane() {
         this.setLayout(null);
 //        this.setBackground(Color.BLACK);
         this.setBackground(new Color(63, 61, 64));
         /*   指定圖片檔位置   */
         try{
+            shadowBk =ImageIO.read(getClass().getResource("Tetris_image/shadow.png"));
             backimage1 = ImageIO.read(getClass().getResource("Tetris_image/bg1.png"));
             backimage2 = ImageIO.read(getClass().getResource("Tetris_image/bg2.png"));
-            color[0]=ImageIO.read(getClass().getResource("Tetris_image/shadow.png"));
-//            color[0]=ImageIO.read(getClass().getResource("Tetris_image/lightBlue3.png"));
+//            color[0]=ImageIO.read(getClass().getResource("Tetris_image/shadow.png"));
+            color[0]=ImageIO.read(getClass().getResource("Tetris_image/lightBlue3.png"));
             color[1]=ImageIO.read(getClass().getResource("Tetris_image/red.png"));
             color[2]=ImageIO.read(getClass().getResource("Tetris_image/green1.png"));
             color[3]=ImageIO.read(getClass().getResource("Tetris_image/blue1.png"));
@@ -117,8 +116,6 @@ class TetrisPane extends JPanel implements KeyListener{
         /*  不明原因,toolkit的圖片讀取方式不能用*/
 //        backimage1=Toolkit.getDefaultToolkit().getImage("Tetris_image/bg1.png");
 //        backimage2=Toolkit.getDefaultToolkit().getImage("Tetris_image/bg2.png");
-
-
         /*  初始化背景陣列  */
         initmap();
         newBlock();
@@ -136,7 +133,6 @@ class TetrisPane extends JPanel implements KeyListener{
             }
         }
     }
-
     /*  swing用來畫圖的方法,awt中不用重寫方法,但是swing需要重寫*/
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -159,14 +155,13 @@ class TetrisPane extends JPanel implements KeyListener{
                 }else{
                     g.drawImage(color[map[i][j]-1],i*30+3*(i+1)+175,j*30+3*(j+1),null);
                 }
-
             }
         }//for loop end
-
         if(!flag){
             for (int i=0;i<16;i++){
                 if(shapes[blockType][turnState][i]==1){
                     g.drawImage(color[blockType], (i%4+x)*33+3+175, (i/4+y)*33+3, null);
+                    g.drawImage(shadowBk,(i%4+x)*33+3+175,(i/4+fall_downShadow())*33+3,null);
                 }
             }
         }
@@ -177,20 +172,17 @@ class TetrisPane extends JPanel implements KeyListener{
                 }
             }
         }
-
         for(int i=0;i<16;i++){
             if(shapes[nextblock][0][i]==1){
                 g.drawImage(color[nextblock],(i%4)*33+3+550, (i/4)*33+80, null);
             }
         }
-
 //        /*  測試是否能正常顯示掉落方塊*/
 //        g.drawImage(color[0],(0%4+x)*33+3+175,(0/4+y)*33+3,null);
 //        g.drawImage(color[0],(1%4+x)*33+3+175,(1/4+y)*33+3,null);
 //        g.drawImage(color[0],(2%4+x)*33+3+175,(2/4+y)*33+3,null);
 //        g.drawImage(color[0],(3%4+x)*33+3+175,(3/4+y)*33+3,null);
     }
-
     public int blow(int x ,int y, int blockType,int turnState){
         for(int i=0;i<16;i++){
             if(shapes[blockType][turnState][i]==1){
@@ -204,7 +196,6 @@ class TetrisPane extends JPanel implements KeyListener{
         }
         return 1;
     }
-
     public void setBlock(int x,int y,int blockType,int turnState){
         flag=true;
         for (int i=0;i<16;i++){
@@ -213,7 +204,6 @@ class TetrisPane extends JPanel implements KeyListener{
             }
         }
     }
-
     public void newBlock(){
         flag=false;
         blockType = nextblock;
@@ -226,8 +216,6 @@ class TetrisPane extends JPanel implements KeyListener{
         }
         repaint();
     }
-
-
     public int down_Shift(){
         int down=0;
         if(blow(x,y+1,blockType,turnState)==1){
@@ -240,10 +228,8 @@ class TetrisPane extends JPanel implements KeyListener{
             deLine();
             down=0;
         }
-
         return down;
     }
-
     public void fall_down(){
         while (blow(x,y+1,blockType,turnState)==1){
             y++;
@@ -254,7 +240,14 @@ class TetrisPane extends JPanel implements KeyListener{
             deLine();
         }
     }
-
+    public int fall_downShadow(){
+        z=y;
+        while (blow(x,z+1,blockType,turnState)==1){
+            z++;
+        }repaint();
+        if (blow(x,z+1,blockType,turnState)==0){
+        }return z;
+    }
     public int r_Shift(){
         int right=0;
         if (blow(x+1,y,blockType,turnState)==1){
@@ -263,19 +256,13 @@ class TetrisPane extends JPanel implements KeyListener{
             right=1;
         }repaint();
         return right;
-
-
     }
-
     public void l_Shift(){
         if (blow(x-1,y,blockType,turnState)==1){
-//            System.out.println(x);
             x--;
             System.out.println(x);
         }repaint();
     }
-
-
 
     public int gameOver(int x,int y){
         if(blow(x,y,blockType,turnState)==0){
@@ -302,12 +289,9 @@ class TetrisPane extends JPanel implements KeyListener{
                 x-=2;
                 turnState=tmpState;
             }
-
         }
         repaint();
     }
-
-
     void deLine(){
         int row=19,access1=0;
         for(int i=19;i>=0;i--){
@@ -317,7 +301,6 @@ class TetrisPane extends JPanel implements KeyListener{
                     count++;
                 }
             }
-
             if(count==10){
                 access1=1;
                 for(int j=0;j<10;j++){
@@ -331,14 +314,10 @@ class TetrisPane extends JPanel implements KeyListener{
                 row--;
             }
         }
-
     }
-
     @Override
     public void keyTyped(KeyEvent e) {
-
     }
-
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()){
@@ -354,21 +333,6 @@ class TetrisPane extends JPanel implements KeyListener{
             case KeyEvent.VK_UP:
                 roTate();
                 break;
-//            case KeyEvent.VK_SHIFT:
-//                if(hold >= 0 && change == 1) {
-//                    int tmp;
-//                    tmp = hold;
-//                    hold = blockType;
-//                    blockType = tmp;
-//                    x = 4;
-//                    y = 0;
-//                    change = 0;
-//                } else if(change == 1) {
-//                    hold = blockType;
-//                    newBlock();
-//
-//                }
-//                break;
             case KeyEvent.VK_SHIFT:
                 if(holdblock>=0&&changedblock==1){
                     int temp;
@@ -410,4 +374,6 @@ class TetrisPane extends JPanel implements KeyListener{
             System.exit(0);
         }
     }
+
+
 }

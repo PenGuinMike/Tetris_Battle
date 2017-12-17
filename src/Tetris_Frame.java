@@ -13,6 +13,7 @@ public class Tetris_Frame extends JFrame {
     Container cp;
     int FrameW=1800,FrameH=900;
     private Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+    private Sever_Tetris st;
     public Tetris_Frame (){
         init();
     }
@@ -32,12 +33,19 @@ public class Tetris_Frame extends JFrame {
         tp.setBounds(100,80,700,700);
         tp2.setBounds(1000,80,700,700);
         tp.setPreferredSize(new Dimension(700,700));
+
 //        tp2.setPreferredSize(new Dimension(700,700));
         cp.add(tp);addKeyListener(tp);
         cp.add(tp2);
+        st=new Sever_Tetris(tp);
+        Thread thread1 = new Thread(tp);
+        thread1.start();
+        st.start();
+
     }
 }
-class TetrisPane extends JPanel implements KeyListener{
+class TetrisPane extends JPanel implements KeyListener ,Runnable{
+
     /*  宣告背景陣列  */
     public int map[][] = new int[10][20];
     /*  宣告方塊圖片  */
@@ -45,6 +53,7 @@ class TetrisPane extends JPanel implements KeyListener{
     private Image backimage2;
     private Image shadowBk;
     /*  宣告方塊數據*/
+    private int blockPause;
     private int blockType;
     private int turnState;
     private int x,y,z;
@@ -122,8 +131,8 @@ class TetrisPane extends JPanel implements KeyListener{
         holdblock=-1;
         nextblock=(int)(Math.random()*7);
         /*  宣告Timer  */
-        Timer t1 = new Timer(800, new TimerListener());
-        t1.start();
+
+
     }
     /*  背景陣列全部設成0*/
     private void initmap() {
@@ -205,6 +214,7 @@ class TetrisPane extends JPanel implements KeyListener{
         }
     }
     public void newBlock(){
+        blockPause=0;
         flag=false;
         blockType = nextblock;
         changedblock = 1;
@@ -220,9 +230,12 @@ class TetrisPane extends JPanel implements KeyListener{
         int down=0;
         if(blow(x,y+1,blockType,turnState)==1){
             y++;
+//            System.out.println(y);
             down=1;
         }repaint();
-        if (blow(x,y+1,blockType,turnState)==0){
+        if (blow(x,y+1,blockType,turnState)==0&&blockPause<1){
+            blockPause++;
+        }else if(blow(x,y+1,blockType,turnState)==0&&blockPause>0){
             setBlock(x,y,blockType,turnState);
             newBlock();
             deLine();
@@ -252,7 +265,7 @@ class TetrisPane extends JPanel implements KeyListener{
         int right=0;
         if (blow(x+1,y,blockType,turnState)==1){
             x++;
-            System.out.println(x);
+//            System.out.println(x);
             right=1;
         }repaint();
         return right;
@@ -260,7 +273,7 @@ class TetrisPane extends JPanel implements KeyListener{
     public void l_Shift(){
         if (blow(x-1,y,blockType,turnState)==1){
             x--;
-            System.out.println(x);
+//            System.out.println(x);
         }repaint();
     }
 
@@ -287,6 +300,15 @@ class TetrisPane extends JPanel implements KeyListener{
                 turnState=tmpState;
             }else if(x>6){
                 x-=2;
+                turnState=tmpState;
+            }else if(y==17&&blockType==0){
+                y-=1;
+                turnState=tmpState;
+            }else if(y==18&&blockType==0){
+                y-=2;
+                turnState=tmpState;
+            }else if(y==19&&blockType==0){
+                y-=2;
                 turnState=tmpState;
             }
         }
@@ -357,6 +379,12 @@ class TetrisPane extends JPanel implements KeyListener{
                 fall_down();
                 break;
         }
+    }
+
+    @Override
+    public void run() {
+        Timer t1 = new Timer(800, new TimerListener());
+        t1.start();
     }
 
     class TimerListener implements ActionListener {
